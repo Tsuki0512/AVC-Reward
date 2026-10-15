@@ -33,6 +33,10 @@
 
 Modern joint audio-video generation introduces multi-event composition, multi-layer audio mixtures, and asymmetric cross-modal relations, challenging existing clip-level and predefined-relation metrics. We propose an event-centric framework that disentangles individual events, distinguishes audio source roles, and cross-validates event-dependent relations across modalities, yielding a coarse-to-fine, three-level consistency metric.
 
+<p align="center">
+  <img src="fig/main-fig-cropped.png" alt="AVC-Reward event-centric audio-video consistency evaluation overview" width="100%">
+</p>
+
 - **Global Narrative Harmony** (`S_mac`): Measures agreement in narrative content, entity identity, environment, and affective tone across the entire clip.
 - **Event-level Temporal Synchronization** (`S_temp`): Evaluates event presence and temporal alignment of onset, offset, and duration under event-dependent cross-modal relations.
 - **Fine-grained Attribute Alignment** (`S_attr`): Assesses physical, morphological, and causal-response compatibility within temporally verified event relations.
