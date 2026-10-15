@@ -1,0 +1,69 @@
+{
+  "csv": "data/benchmark_all_data_all_models.csv",
+  "rows": 706,
+  "predictors": [
+    "AGAV-Rater",
+    "AV-Align",
+    "AV-Consistency Evaluator",
+    "AVC-RewardModel (Ours)",
+    "AVHScore",
+    "AVSyncEvaluator",
+    "DeSync",
+    "Gemini-3.1-Pro",
+    "ImageBind",
+    "JavisScore",
+    "PEAVS",
+    "Qwen3-Omni-Instruct",
+    "Qwen3-Omni-Thinking (Baseline)",
+    "SFT Only (Table 4)"
+  ],
+  "dimensions": {
+    "Gemini-3.1-Pro": [
+      "macro",
+      "temporal",
+      "fine_grained"
+    ],
+    "Qwen3-Omni-Thinking (Baseline)": [
+      "macro",
+      "temporal",
+      "fine_grained"
+    ],
+    "Qwen3-Omni-Instruct": [
+      "macro",
+      "temporal",
+      "fine_grained"
+    ],
+    "AVC-RewardModel (Ours)": [
+      "macro",
+      "temporal",
+      "fine_grained"
+    ],
+    "SFT Only (Table 4)": [
+      "macro",
+      "temporal",
+      "fine_grained"
+    ],
+    "AV-Align": [],
+    "DeSync": [],
+    "ImageBind": [],
+    "PEAVS": [],
+    "JavisScore": [],
+    "AVHScore": [],
+    "AVSyncEvaluator": [],
+    "AV-Consistency Evaluator": [],
+    "AGAV-Rater": []
+  },
+  "deltas": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.5
+  ],
+  "pairwise_rule": "abs(gt_i - gt_j) > delta; prediction ties receive 0.5 credit",
+  "plcc": "Pearson correlation after unbounded five-parameter logistic fit; fallback to raw Pearson on fit failure",
+  "new_numeric_columns": "automatically discovered as scalar predictors unless they use the __macro/__temporal/__fine_grained grouped schema"
+}

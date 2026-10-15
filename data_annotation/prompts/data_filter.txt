@@ -1,0 +1,11 @@
+PROMPT_SCORE_1
+Does this video clip feature multiple, distinct audio-visual events where a specific visual action (e.g., an object impact, a specific gesture) clearly and unambiguously causes a corresponding sound? Please only answer 'yes' or 'no'.
+
+PROMPT_SCORE_2
+Does this clip contain critical moments where precise temporal synchronization between sound and video is clearly observable and essential for coherence (e.g., speech lip-sync, an object hitting a surface at a specific instant, or musical beats matching actions)? Please only answer 'yes' or 'no'.
+
+PROMPT_SCORE_3
+Does the clip convey a complex or distinct macro-semantic context (e.g., a specific activity, a clear emotional tone like 'suspenseful' or 'joyful') where both the overall visual scene and the background audio/music contribute significantly to this shared meaning? Please only answer 'yes' or 'no'.
+
+PROMPT_SCORE_4
+Are the primary audio events and visual actions in this clip salient and well-defined, or are they obscured by excessive background noise, poor lighting, visual clutter, or ambiguity in what is happening? (Answer 'Yes' if they are clear, 'No' if they are obscured).

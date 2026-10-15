@@ -1,0 +1,5 @@
+# Dependencies for benchmark/scripts/benchmark_eval.py.
+numpy>=1.24,<3
+pandas>=2.0,<4
+scipy>=1.10,<2
+huggingface_hub[cli]>=0.25

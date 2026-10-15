@@ -1,0 +1,49 @@
+# Secrets and private local settings
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+secrets/
+
+# Model weights / large binaries
+checkpoints/
+models/
+generation_model/code/ltx_v2/
+*.safetensors
+*.ckpt
+*.pth
+*.pt
+*.bin
+*.gguf
+*.onnx
+
+# Media, generated outputs, local caches
+outputs/
+results/
+wandb/
+logs/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+*.mp4
+*.mov
+*.wav
+*.mp3
+*.flac
+
+# Dataset downloads and local caches; the released score table is under benchmark/data/
+data/AVC-Benchmark/
+data/cache/
+data/raw/
+data/private/
+data_annotation/outputs/
+*.parquet
+*.arrow
