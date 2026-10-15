@@ -1,0 +1,7 @@
+name: avc-reward-generation
+channels:
+  - defaults
+dependencies:
+  - ffmpeg
+  - pip
+  - python=3.11

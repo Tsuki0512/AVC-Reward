@@ -57,12 +57,16 @@
 
 ### 环境与权重
 
-请在仓库根目录创建环境。配置中包含 Qwen3-Omni/vLLM 运行时，以及未提供独立音频文件时从视频提取音轨所需的 `ffmpeg`。
+请在仓库根目录创建环境。配置中包含 Qwen3-Omni/vLLM 运行时，以及未提供独立音频文件时从视频提取音轨所需的 `ffmpeg`。以下命令假设已安装 Conda 且 `conda` 命令已在 `PATH` 中；否则请先按现有安装路径将 Conda 的 `bin` 目录加入 `PATH`。
+
 
 ```bash
-conda env create -f reward_model/environment.yml
-conda activate qwen3omni
-hf download Tsuki0512/AVC-Reward --local-dir checkpoints/AVC-Reward
+export WORK_ROOT="${WORK_ROOT:-$HOME/avc_reward_runtime}"
+mkdir -p "$WORK_ROOT"/{envs,checkpoints,media/tmp,outputs,logs,cache,ltx-runtime}
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda env create --prefix "$WORK_ROOT/envs/avc-reward" --file reward_model/environment.inference.yml
+conda activate "$WORK_ROOT/envs/avc-reward"
+hf download Tsuki0512/AVC-Reward --local-dir "$WORK_ROOT/checkpoints/AVC-Reward"
 ```
 
 ### 启动 vLLM
@@ -70,11 +74,19 @@ hf download Tsuki0512/AVC-Reward --local-dir checkpoints/AVC-Reward
 服务端会读取本地媒体文件。将 `ALLOWED_LOCAL_MEDIA_PATH` 设置为清单媒体所在目录；默认只监听 `127.0.0.1`。
 
 ```bash
-export MODEL_DIR="$PWD/checkpoints/AVC-Reward"
+export WORK_ROOT="${WORK_ROOT:-$HOME/avc_reward_runtime}"
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$WORK_ROOT/envs/avc-reward"
+export CUDA_VISIBLE_DEVICES=0
+export MODEL_DIR="$WORK_ROOT/checkpoints/AVC-Reward"
 export HOST=127.0.0.1
 export PORT=8901
-export TENSOR_PARALLEL_SIZE=4
-export ALLOWED_LOCAL_MEDIA_PATH="/absolute/path/to/media"
+export TENSOR_PARALLEL_SIZE=1
+export GPU_MEMORY_UTILIZATION=0.85
+export MAX_MODEL_LEN=32768
+export ALLOWED_LOCAL_MEDIA_PATH="$WORK_ROOT/media"
+export TMPDIR="$WORK_ROOT/media/tmp"
+export LOG_PATH="$WORK_ROOT/logs/reward_vllm.log"
 bash reward_model/code/start_reward_vllm.sh
 ```
 
@@ -99,10 +111,21 @@ bash reward_model/code/start_reward_vllm.sh
 ```
 
 ```bash
+export WORK_ROOT="${WORK_ROOT:-$HOME/avc_reward_runtime}"
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$WORK_ROOT/envs/avc-reward"
+export TMPDIR="$WORK_ROOT/media/tmp"
+mkdir -p "$WORK_ROOT/media/tmp" "$WORK_ROOT/outputs/reward"
+ffmpeg -hide_banner -loglevel error -y \
+  -f lavfi -i 'testsrc2=size=640x360:rate=10:duration=3' \
+  -f lavfi -i 'sine=frequency=440:sample_rate=48000:duration=3' \
+  -c:v mpeg4 -q:v 5 -pix_fmt yuv420p -c:a aac -shortest \
+  "$WORK_ROOT/media/sample_with_audio.mp4"
+python -c 'import json,os; p=os.path.join(os.environ["WORK_ROOT"],"media/sample_with_audio.mp4"); open(os.path.join(os.environ["WORK_ROOT"],"media/smoke.jsonl"),"w").write(json.dumps({"id":"avc-smoke-001","videos":[p]})+"\n")'
 python reward_model/code/reward_model_inference.py \
-  --input manifests/videos.jsonl \
-  --output-jsonl outputs/reward_scores.jsonl \
-  --base-dir "$PWD" \
+  --input "$WORK_ROOT/media/smoke.jsonl" \
+  --output-jsonl "$WORK_ROOT/outputs/reward/scores.jsonl" \
+  --base-dir "$WORK_ROOT/media" \
   --endpoint http://127.0.0.1:8901/v1/chat/completions \
   --model reward_model
 ```
@@ -117,12 +140,26 @@ CSV 默认读取 `video_path` 列；若有独立音频列，添加 `--audio-colu
 
 ### 环境与 LTX-2 运行时代码
 
-在仓库根目录创建独立生成环境，然后获取公开的 LTX-2 1.1.1 源码。安装脚本会应用推理代码所需的分模态引导系数修改。
+在仓库根目录创建独立生成环境，然后获取固定版本的 LTX-2 源码。推理入口使用上游 `TI2VidOneStagePipeline`，并分别配置视频与音频 guider。
 
 ```bash
-conda env create -f generation_model/environment.yml
-conda activate avc-reward-generation
+export WORK_ROOT="${WORK_ROOT:-$HOME/avc_reward_runtime}"
+export CUDA_VISIBLE_DEVICES=0
+export PIP_CONFIG_FILE=/dev/null
+export PIP_INDEX_URL=https://pypi.org/simple
+unset PIP_EXTRA_INDEX_URL || true
+export PIP_CACHE_DIR="$WORK_ROOT/cache/pip"
+export TMPDIR="$WORK_ROOT/media/tmp"
+mkdir -p "$WORK_ROOT"/{envs,checkpoints,media/tmp,outputs,logs,cache,ltx-runtime}
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda env create --prefix "$WORK_ROOT/envs/avc-generation" --file generation_model/environment.inference.yml
+conda activate "$WORK_ROOT/envs/avc-generation"
+python -m pip install --index-url https://download.pytorch.org/whl/cu128 \
+  torch==2.8.0 torchaudio==2.8.0 torchvision==0.23.0
+python -m pip install -r generation_model/requirements.inference.txt
+export LTX_V2_ROOT="$WORK_ROOT/ltx-runtime/LTX-2"
 bash generation_model/code/install_ltx_runtime.sh
+git -C "$LTX_V2_ROOT" rev-parse HEAD
 ```
 
 上游源码固定为 [`d887bbd1e045b316d0a855f8d421209ecfc97ed1`](https://github.com/Lightricks/LTX-2/tree/d887bbd1e045b316d0a855f8d421209ecfc97ed1)。使用运行时代码或模型前，请阅读上游的 [LTX-2 Community License](https://github.com/Lightricks/LTX-2/blob/d887bbd1e045b316d0a855f8d421209ecfc97ed1/LICENSE)。
@@ -132,30 +169,55 @@ bash generation_model/code/install_ltx_runtime.sh
 AVC-Reward LoRA 对应 LTX-2 dev 基座，请搭配 `ltx-2-19b-dev.safetensors` 和对应的 Gemma 3 文本编码器。下载 Gemma 可能需要先在 Hugging Face 接受模型条款。
 
 ```bash
-hf download Lightricks/LTX-2 ltx-2-19b-dev.safetensors --local-dir checkpoints/LTX-2
-hf download google/gemma-3-12b-it --local-dir checkpoints/gemma-3-12b-it
-hf download Tsuki0512/LTX-2-AVCReward-LoRA --local-dir checkpoints/LTX-2-AVCReward-LoRA
+export WORK_ROOT="${WORK_ROOT:-$HOME/avc_reward_runtime}"
+mkdir -p "$WORK_ROOT"/{checkpoints,cache/huggingface}
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$WORK_ROOT/envs/avc-generation"
+export HF_HOME="$WORK_ROOT/cache/huggingface"
+export HF_HUB_CACHE="$HF_HOME/hub"
+hf auth login
+hf download Lightricks/LTX-2 ltx-2-19b-dev.safetensors --local-dir "$WORK_ROOT/checkpoints/LTX-2"
+hf download google/gemma-3-12b-it --local-dir "$WORK_ROOT/checkpoints/gemma-3-12b-it"
+hf download Tsuki0512/LTX-2-AVCReward-LoRA --local-dir "$WORK_ROOT/checkpoints/LTX-2-AVCReward-LoRA"
 ```
 
 ### 合并与生成
 
 ```bash
 python generation_model/code/merge_lora.py \
-  --checkpoint-path checkpoints/LTX-2/ltx-2-19b-dev.safetensors \
-  --lora-dir checkpoints/LTX-2-AVCReward-LoRA \
-  --output-path checkpoints/ltx2_avc_reward_merged.safetensors \
+  --checkpoint-path "$WORK_ROOT/checkpoints/LTX-2/ltx-2-19b-dev.safetensors" \
+  --lora-dir "$WORK_ROOT/checkpoints/LTX-2-AVCReward-LoRA" \
+  --output-path "$WORK_ROOT/checkpoints/ltx2_avc_reward_merged.safetensors" \
   --dtype bf16 \
   --strict
 
 CUDA_VISIBLE_DEVICES=0 python generation_model/code/inference.py \
-  --model_path checkpoints/ltx2_avc_reward_merged.safetensors \
-  --gemma_path checkpoints/gemma-3-12b-it \
+  --model_path "$WORK_ROOT/checkpoints/ltx2_avc_reward_merged.safetensors" \
+  --gemma_path "$WORK_ROOT/checkpoints/gemma-3-12b-it" \
   --prompt "A chef chops vegetables while a phone rings off-screen." \
+  --num_frames 121 \
+  --video_guidance_scale 3 \
+  --audio_guidance_scale 7 \
+  --stg_scale 1 \
   --seed 42 \
-  --output_dir outputs/generation
+  --dtype bf16 \
+  --output_dir "$WORK_ROOT/outputs/generation"
 ```
 
-推理会保存包含音轨的 MP4 和独立 WAV。推理选项：`--model_path`、`--gemma_path`、`--prompt`、`--negative_prompt`、`--num_frames`、`--height`、`--width`、`--frame_rate`、`--num_inference_steps`、`--video_guidance_scale`、`--audio_guidance_scale`、`--stg_scale`、`--seed`、`--output_dir` 和 `--dtype`。合并脚本选项：`--checkpoint-path`、`--lora-dir`、`--output-path`、`--dtype` 和 `--strict`。
+推理会保存包含音轨的 MP4 和独立 WAV。基础选项包括 `--model_path`、`--gemma_path`、`--prompt`、`--negative_prompt`、`--num_frames`、`--height`、`--width`、`--frame_rate`、`--num_inference_steps`、`--seed`、`--output_dir` 和 `--dtype`。Guider 选项如下：
+
+| 参数 | 含义 |
+|---|---|
+| `--video_guidance_scale` / `--audio_guidance_scale` | 设置视频 / 音频 CFG scale |
+| `--stg_scale` | 同时设置两个模态的 STG scale |
+| `--video_stg_scale` / `--audio_stg_scale` | 分别设置视频 / 音频 STG scale |
+| `--video_rescale_scale` / `--audio_rescale_scale` | 设置视频 / 音频 CFG rescale |
+| `--a2v_guidance_scale` | 视频 guider 中的 audio-to-video modality scale |
+| `--v2a_guidance_scale` | 音频 guider 中的 video-to-audio modality scale |
+| `--video_skip_step` / `--audio_skip_step` | 设置视频 / 音频 guider 的 skip step |
+| `--video_stg_blocks` / `--audio_stg_blocks` | 设置视频 / 音频 STG block 索引，可传一个或多个整数 |
+
+模态专属 STG scale 优先于 `--stg_scale`；未指定专属值时使用通用值；两者均未指定时使用该模态的 checkpoint 版本预设。未覆盖的 CFG、rescale、modality、skip step 和 STG blocks 保留各自模态预设。`detect_params()` 根据识别到的 checkpoint 版本选择预设；版本未知时回退到 LTX-2 默认值。当前 pipeline 只支持 `--dtype bf16`。合并脚本选项：`--checkpoint-path`、`--lora-dir`、`--output-path`、`--dtype` 和 `--strict`。
 
 基座、Gemma 编码器、LoRA 和合并权重分别从对应链接下载。
 
@@ -166,11 +228,16 @@ CUDA_VISIBLE_DEVICES=0 python generation_model/code/inference.py \
 Hugging Face 数据集托管音视频媒体。本仓库的本地 CSV 是独立的 706 行评分表，供现有评测脚本读取；脚本不会下载媒体或运行模型推理。
 
 ```bash
+export WORK_ROOT="${WORK_ROOT:-$HOME/avc_reward_runtime}"
+source "$(conda info --base)/etc/profile.d/conda.sh"
+mkdir -p "$WORK_ROOT"/{envs,outputs/benchmark}
+conda create -y --prefix "$WORK_ROOT/envs/avc-benchmark" python=3.11 pip
+conda activate "$WORK_ROOT/envs/avc-benchmark"
 python -m pip install -r benchmark/requirements.txt
-hf download Tsuki0512/AVC-Benchmark --repo-type dataset --local-dir data/AVC-Benchmark
+python -m pip check
 python benchmark/scripts/benchmark_eval.py \
   --csv benchmark/data/benchmark_all_data_all_models.csv \
-  --output_dir benchmark/metrics/reproduced \
+  --output_dir "$WORK_ROOT/outputs/benchmark" \
   --deltas 0 0.05 0.1 0.15 0.2 0.25 0.3 0.5
 ```
 

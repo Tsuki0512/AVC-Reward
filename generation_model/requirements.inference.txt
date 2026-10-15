@@ -1,0 +1,15 @@
+# Runtime dependencies for merge_lora.py and inference.py with the pinned LTX-2 source.
+accelerate==1.15.0
+av==18.1.0
+einops==0.8.2
+huggingface-hub==0.36.2
+numpy==2.4.6
+peft==0.21.2
+Pillow==12.3.0
+rich==15.0.0
+safetensors==0.8.0
+scipy==1.17.1
+sentencepiece==0.2.2
+soundfile==0.14.0
+tqdm==4.70.1
+transformers==4.57.6

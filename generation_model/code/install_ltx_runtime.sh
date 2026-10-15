@@ -8,7 +8,6 @@ UPSTREAM="https://github.com/Lightricks/LTX-2.git"
 REVISION="d887bbd1e045b316d0a855f8d421209ecfc97ed1"
 
 command -v git >/dev/null 2>&1 || { echo "git is required to fetch LTX-2." >&2; exit 2; }
-command -v python3 >/dev/null 2>&1 || { echo "python3 is required to apply the inference patch." >&2; exit 2; }
 
 if [[ -e "${RUNTIME_ROOT}" ]]; then
   echo "Runtime destination already exists: ${RUNTIME_ROOT}" >&2
@@ -28,6 +27,6 @@ if [[ "${actual_revision}" != "${REVISION}" ]]; then
   exit 2
 fi
 
-python3 "${SCRIPT_DIR}/patch_ltx_avc_guidance.py" --ltx-root "${RUNTIME_ROOT}"
 echo "Installed LTX-2 ${REVISION} at ${RUNTIME_ROOT}"
+echo "The inference entry point uses the upstream TI2VidOneStagePipeline."
 echo "Review the upstream license at ${RUNTIME_ROOT}/LICENSE before using the model or adapter."

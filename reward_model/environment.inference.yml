@@ -1,0 +1,10 @@
+name: avc-reward
+channels:
+  - defaults
+dependencies:
+  - ffmpeg
+  - pip
+  - python=3.10
+  - pip:
+      - qwen-omni-utils==0.0.8
+      - vllm==0.12.0
