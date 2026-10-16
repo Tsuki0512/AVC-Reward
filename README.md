@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://huggingface.co/Tsuki0512/AVC-Reward"><img src="https://img.shields.io/badge/%F0%9F%A4%97-Hugging_Face-FFD21E" alt="Hugging Face Reward Model"></a>
-  <a href="https://tsuki0512.github.io/AVC-Reward.github.io/"><img src="https://img.shields.io/badge/arXiv-Coming_Soon-B31B1B?logo=arxiv&logoColor=white" alt="arXiv coming soon"></a>
+  <a href="https://arxiv.org/abs/2610.22321"><img src="https://img.shields.io/badge/arXiv-2610.22321-B31B1B?logo=arxiv&logoColor=white" alt="arXiv:2610.22321"></a>
   <a href="https://tsuki0512.github.io/AVC-Reward.github.io/"><img src="https://img.shields.io/badge/Project-Page-2563EB?logo=googlechrome&logoColor=white" alt="Project Page"></a>
 </p>
 
@@ -18,7 +18,7 @@
 - **Released** — AVC-Reward LTX-2 LoRA weights, merge script, and joint audio-video inference code.
 - **Released** — AVC-Benchmark data and scoring code.
 - **Released** — Five-stage data annotation code.
-- **Coming soon** — Paper preprint on arXiv. The badge currently points to the [Project Page](https://tsuki0512.github.io/AVC-Reward.github.io/).
+- **Released** — The paper is available on [arXiv:2610.22321](https://arxiv.org/abs/2610.22321).
 
 ### 👉 TODO
 
@@ -259,7 +259,7 @@ The five-stage annotation pipeline and prompts are documented in [`data_annotati
 
 ## 🖊️ Citation
 
-**TBD.** The arXiv identifier and BibTeX entry will be added after the preprint is available. Until then, see the [Project Page](https://tsuki0512.github.io/AVC-Reward.github.io/).
+[arXiv:2610.22321](https://arxiv.org/abs/2610.22321).
 
 ## ⚖️ License
 

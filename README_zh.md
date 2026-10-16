@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://huggingface.co/Tsuki0512/AVC-Reward"><img src="https://img.shields.io/badge/%F0%9F%A4%97-Hugging_Face-FFD21E" alt="Hugging Face 奖励模型"></a>
-  <a href="https://tsuki0512.github.io/AVC-Reward.github.io/"><img src="https://img.shields.io/badge/arXiv-Coming_Soon-B31B1B?logo=arxiv&logoColor=white" alt="arXiv 即将发布"></a>
+  <a href="https://arxiv.org/abs/2610.22321"><img src="https://img.shields.io/badge/arXiv-2610.22321-B31B1B?logo=arxiv&logoColor=white" alt="arXiv:2610.22321"></a>
   <a href="https://tsuki0512.github.io/AVC-Reward.github.io/"><img src="https://img.shields.io/badge/Project-Page-2563EB?logo=googlechrome&logoColor=white" alt="项目主页"></a>
 </p>
 
@@ -18,7 +18,7 @@
 - **已发布** — AVC-Reward LTX-2 LoRA 权重、合并脚本和音视频联合推理代码。
 - **已发布** — AVC-Benchmark 数据与评分代码。
 - **已发布** — 五阶段数据标注代码。
-- **即将发布** — 论文 arXiv 预印本。当前 arXiv 徽章暂时指向[项目主页](https://tsuki0512.github.io/AVC-Reward.github.io/)。
+- **已发布** — 论文已发布于 [arXiv:2610.22321](https://arxiv.org/abs/2610.22321)。
 
 ### 👉 TODO
 
@@ -259,7 +259,7 @@ CSV 包含人工目标列 `human_macro`、`human_temporal`、`human_fine_grained
 
 ## 🖊️ 引用（Citation）
 
-**TBD。** arXiv 预印本发布后补充编号和 BibTeX。当前请参阅[项目主页](https://tsuki0512.github.io/AVC-Reward.github.io/)。
+[arXiv:2610.22321](https://arxiv.org/abs/2610.22321)。
 
 ## ⚖️ 许可（License）
 
